@@ -2,13 +2,18 @@ import { useState } from "react";
 import SaveButton from "./SaveButton";
 import LogTable from "./LogTable";
 import PassIcon from "./PassIcon";
+import EditModel from "./EditModel";
+import { v4 as uuidv4 } from 'uuid';
 
 const Manager = () => {
   const [form, setform] = useState({ site: "", username: "", password: "" });
+  const [editingItem, setEditingItem] = useState(null);
+  const [ShowPassword, setShowPassword] = useState(false)
 
   const [passwordArray, setPasswordArray] = useState(() => {
     const saved = localStorage.getItem("passwords");
-    return saved ? JSON.parse(saved) : [];
+    const parsed = saved ? JSON.parse(saved) : [];
+    return parsed.map(item => item.id ? item : { ...item, id: uuidv4() });
   });
 
   const handleChange = (e) => {
@@ -21,12 +26,24 @@ const Manager = () => {
       return;
     }
 
-    localStorage.setItem("passwords", JSON.stringify([...passwordArray, form]));
-    setPasswordArray([...passwordArray, form]);
+    const newEntry = { ...form, id: uuidv4() };
+    const updatedArray = [...passwordArray, newEntry];
+    
+    setPasswordArray(updatedArray);
+    localStorage.setItem("passwords", JSON.stringify(updatedArray));
+    
     setform({ site: "", username: "", password: "" });
-    console.log([...passwordArray, form]);
+    console.log(updatedArray);
   };
 
+  const handleDeleteItem = (id) => {
+    if (window.confirm("Delete this password?")) {
+      setPasswordArray(passwordArray.filter(item => item.id !== id));
+      localStorage.setItem("passwords", JSON.stringify(passwordArray.filter(item => item.id !== id)));
+    }
+  };
+
+  
   return (
     <>
       <div className="absolute inset-0 -z-10 h-full w-full bg-white [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)]"></div>
@@ -75,10 +92,10 @@ const Manager = () => {
                   name="password"
                   onChange={handleChange}
                   placeholder="••••••••"
-                  type="password"/>
+                  type={ShowPassword ? "text" :"password"}/>
 
                 <div className="absolute right-3 z-10 flex items-center justify-center cursor-pointer select-none">
-                  <PassIcon onClick={() => console.log("toggle")} />
+                  <PassIcon onClick={() => setShowPassword(!ShowPassword)} />
                 </div>
               </div>
 
@@ -89,7 +106,17 @@ const Manager = () => {
         </div>
       </div>
       
-      <LogTable passwordArray={passwordArray} />
+      <LogTable passwordArray={passwordArray}  
+        onEditItem={(id) => setEditingItem(passwordArray.find(p => p.id === id))} 
+        onDeleteItem={handleDeleteItem} />
+
+      {editingItem && (
+        <EditModel 
+          item={editingItem} 
+          onClose={() => setEditingItem(null)} 
+          passwordArray={passwordArray}
+          setPasswordArray={setPasswordArray} />)
+      }
     </>
   );
 };

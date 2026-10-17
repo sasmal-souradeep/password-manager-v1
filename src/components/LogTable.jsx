@@ -1,6 +1,6 @@
 import Actions from "./ActionIcons";
 
-const LogTable = ({passwordArray = [] }) => {
+const LogTable = ({passwordArray = [], onEditItem, onDeleteItem}) => {
   return (
     <div className="passwords container mx-auto flex flex-col justify-center w-5xl">
     <h1 className="text-center pt-5 pb-2 text-3xl font-bold">
@@ -21,13 +21,17 @@ const LogTable = ({passwordArray = [] }) => {
         </thead>
 
         <tbody className="bg-green-100">
-          {passwordArray.map((item, index) => (
-            <tr key={index} className="border border-white">
+          {passwordArray.map((item) => (
+            <tr key={item.id} className="border border-white">
               <td className="text-center min-w-52 py-3">{item.site}</td>
               <td className="text-center min-w-52 py-3">{item.username}</td>
               <td className="text-center min-w-52 py-3">••••••••</td>
               
-              <td className="text-center min-w-52 py-3"> <Actions/> </td>
+              <td className="text-center min-w-52 py-3"> 
+                <Actions 
+                  onEdit={() => onEditItem(item.id)}
+                  onDelete={() => onDeleteItem(item.id)}/> 
+              </td>
             </tr>))}
 
         </tbody>
