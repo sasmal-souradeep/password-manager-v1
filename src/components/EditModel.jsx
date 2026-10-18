@@ -1,5 +1,6 @@
 import PassIcon from "./PassIcon";
 import { useState } from "react";
+import { toast, Bounce } from 'react-toastify';
 
 const EditModel = ({ item, onClose, passwordArray, setPasswordArray }) => {
   const [localForm, setLocalForm] = useState({
@@ -24,6 +25,18 @@ const EditModel = ({ item, onClose, passwordArray, setPasswordArray }) => {
     setPasswordArray(updatedArray);
     localStorage.setItem("passwords", JSON.stringify(updatedArray));
     onClose();
+
+    toast.success('Credentials Edited', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce
+    })
   };
 
   return (

@@ -3,11 +3,14 @@ import SaveButton from "./SaveButton";
 import LogTable from "./LogTable";
 import PassIcon from "./PassIcon";
 import EditModel from "./EditModel";
+import DeleteModal from "./DeleteModel";
 import { v4 as uuidv4 } from 'uuid';
+import { ToastContainer, toast, Bounce } from 'react-toastify';
 
 const Manager = () => {
   const [form, setform] = useState({ site: "", username: "", password: "" });
   const [editingItem, setEditingItem] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
   const [ShowPassword, setShowPassword] = useState(false)
 
   const [passwordArray, setPasswordArray] = useState(() => {
@@ -22,7 +25,17 @@ const Manager = () => {
 
   const saveCredentials = () => {
     if (!form.site || !form.username || !form.password) {
-      alert("Please fill out all fields before saving!");
+      toast.error('Fill all Fields before svaing', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce
+      })
       return;
     }
 
@@ -35,17 +48,11 @@ const Manager = () => {
     setform({ site: "", username: "", password: "" });
     console.log(updatedArray);
   };
-
-  const handleDeleteItem = (id) => {
-    if (window.confirm("Delete this password?")) {
-      setPasswordArray(passwordArray.filter(item => item.id !== id));
-      localStorage.setItem("passwords", JSON.stringify(passwordArray.filter(item => item.id !== id)));
-    }
-  };
-
   
   return (
     <>
+    <ToastContainer/>
+
       <div className="absolute inset-0 -z-10 h-full w-full bg-white [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)]"></div>
 
       <div className="container mx-auto bg-slate-800 max-w-4xl rounded-2xl mt-10">
@@ -108,15 +115,23 @@ const Manager = () => {
       
       <LogTable passwordArray={passwordArray}  
         onEditItem={(id) => setEditingItem(passwordArray.find(p => p.id === id))} 
-        onDeleteItem={handleDeleteItem} />
+        onDeleteItem={(id) => setDeletingId(id)} />  
 
       {editingItem && (
         <EditModel 
           item={editingItem} 
           onClose={() => setEditingItem(null)} 
           passwordArray={passwordArray}
-          setPasswordArray={setPasswordArray} />)
-      }
+          setPasswordArray={setPasswordArray} />
+      )}
+      {deletingId && (
+        <DeleteModal 
+          id={deletingId}
+          passwordArray={passwordArray}
+          setPasswordArray={setPasswordArray}
+          onClose={() => setDeletingId(null)} />
+      )}
+
     </>
   );
 };
